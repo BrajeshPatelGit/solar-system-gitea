@@ -4,6 +4,7 @@
 # ---------------------------------------------------------------------------------*
 node_modules
 npm-debug.log
+.env
 # ignore .git and .cache folders
 .git
 .cache
