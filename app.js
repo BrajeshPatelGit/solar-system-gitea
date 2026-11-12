@@ -13,18 +13,14 @@ app.use(bodyParser.json());
 app.use(express.static(path.join(__dirname, '/')));
 app.use(cors())
 
-mongoose.connect(process.env.MONGO_URI, {
-    user: process.env.MONGO_USERNAME,
-    pass: process.env.MONGO_PASSWORD,
-    useNewUrlParser: true,
-    useUnifiedTopology: true
-}, function(err) {
-    if (err) {
-        console.log("error!! " + err)
-    } else {
-      //  console.log("MongoDB Connection Successful")
-    }
-})
+if (process.env.MONGO_URI) {
+    mongoose.connect(process.env.MONGO_URI, {
+        user: process.env.MONGO_USERNAME,
+        pass: process.env.MONGO_PASSWORD
+    }).catch((err) => {
+        console.error("MongoDB connection error:", err);
+    });
+}
 
 var Schema = mongoose.Schema;
 
@@ -46,8 +42,8 @@ app.post('/planet',   function(req, res) {
         id: req.body.id
     }, function(err, planetData) {
         if (err) {
-            alert("Ooops, We only have 9 planets and a sun. Select a number from 0 - 9")
-            res.send("Error in Planet Data")
+            console.error("Error fetching planet data:", err);
+            return res.status(500).send("Error in Planet Data");
         } else {
             res.send(planetData);
         }
@@ -91,7 +87,9 @@ app.get('/ready',   function(req, res) {
     });
 })
 
-app.listen(3000, () => { console.log("Server successfully running on port - " +3000); })
+if (require.main === module) {
+    app.listen(3000, () => { console.log("Server successfully running on port - " + 3000); });
+}
 module.exports = app;
 
 //module.exports.handler = serverless(app)

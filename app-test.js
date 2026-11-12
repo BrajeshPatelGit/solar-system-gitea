@@ -1,4 +1,22 @@
 let mongoose = require("mongoose");
+const originalConnect = mongoose.connect;
+const originalFindOne = mongoose.Model.findOne;
+const planetFixtures = new Map([
+    [1, { id: 1, name: "Mercury" }],
+    [2, { id: 2, name: "Venus" }],
+    [3, { id: 3, name: "Earth" }],
+    [4, { id: 4, name: "Mars" }],
+    [5, { id: 5, name: "Jupiter" }],
+    [6, { id: 6, name: "Saturn" }],
+    [7, { id: 7, name: "Uranus" }],
+    [8, { id: 8, name: "Neptune" }]
+]);
+
+mongoose.connect = () => Promise.resolve(mongoose);
+mongoose.Model.findOne = function(conditions, callback) {
+    callback(null, planetFixtures.get(conditions.id) || null);
+};
+
 let server = require("./app");
 let chai = require("chai");
 let chaiHttp = require("chai-http");
@@ -7,6 +25,11 @@ let chaiHttp = require("chai-http");
 // Assertion 
 chai.should();
 chai.use(chaiHttp); 
+
+after(() => {
+    mongoose.connect = originalConnect;
+    mongoose.Model.findOne = originalFindOne;
+});
 
 describe('Planets API Suite', () => {
 
